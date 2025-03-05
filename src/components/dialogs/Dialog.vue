@@ -10,6 +10,7 @@
             class="cursor-pointer"
             :name="isFavoritar ? icons.fasThumbtackSlash : icons.fasThumbtack"
             size="20px"
+            color="primary"
             @click="isFavoritar = !isFavoritar"
           />
         </span>
@@ -18,7 +19,11 @@
         <q-input class="full-width" v-model="filters.titulo" rounded outlined label="Titulo" />
       </q-card-section>
       <q-card-section class="row items-center">
-        <caixa-selecao v-if="isCaixaSelecao" />
+        <caixa-selecao
+          v-if="isCaixaSelecao"
+          :data="checkboxes"
+          @itens-selecionados="checkboxes = $event"
+        />
 
         <q-input
           v-else
@@ -30,10 +35,6 @@
           type="textarea"
         />
       </q-card-section>
-      <!-- <q-card-actions align="right">
-        <q-btn flat label="Cancel" color="primary" v-close-popup />
-        <q-btn flat label="Turn on Wifi" color="primary" v-close-popup />
-      </q-card-actions> -->
       <q-card-actions class="row justify-between">
         <q-icon class="cursor-pointer" name="add" size="25px">
           <q-menu>
@@ -49,7 +50,12 @@
             </q-list>
           </q-menu>
         </q-icon>
-        <q-btn label="Ok" @click="isEditarNota ? editar() : salvar()" v-close-popup />
+        <q-btn
+          color="primary"
+          label="Ok"
+          @click="isEditarNota ? editar() : salvar()"
+          v-close-popup
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -65,6 +71,7 @@ import {
   fasArrowLeft,
   fasSquareCheck,
 } from '@quasar/extras/fontawesome-v6'
+import type { ICheckbox } from 'src/interfaces/nota.interface'
 
 export default defineComponent({
   name: 'DialogComponent',
@@ -91,6 +98,7 @@ export default defineComponent({
       callback: null as ((value) => void) | null,
       isEditarNota: shallowRef<boolean>(false),
       id: shallowRef<string>(''),
+      checkboxes: ref<Array<ICheckbox>>([]),
     }
   },
 
@@ -112,9 +120,13 @@ export default defineComponent({
         }
 
         if (params.nota) {
+          console.log(params.nota)
           this.filters.titulo = params.nota.titulo
           this.filters.nota = params.nota.nota
+          this.isFavoritar = params.nota.isFixed
           this.id = params.nota.id
+          this.isCaixaSelecao = params.nota.isCheckbox
+          this.checkboxes = params.nota.checkboxes
         }
 
         this.toogleModal(true)
@@ -132,19 +144,39 @@ export default defineComponent({
       this.isFavoritar = false
       this.isCaixaSelecao = false
       this.id = ''
+      this.isFavoritar = false
     },
 
     salvar() {
-      if (this.callback) {
-        this.callback(this.filters)
+      if (this.isCaixaSelecao) {
+        this.callback({
+          isCheckbox: true,
+          checkboxes: this.checkboxes,
+          titulo: this.filters.titulo,
+          isFixed: this.isFavoritar,
+        })
+      } else {
+        this.callback({
+          ...this.filters,
+          isFixed: this.isFavoritar,
+        })
       }
     },
 
     editar() {
-      if (this.callback) {
+      if (this.isCaixaSelecao) {
+        this.callback({
+          isCheckbox: true,
+          checkboxes: this.checkboxes,
+          titulo: this.filters.titulo,
+          id: this.id,
+          isFixed: this.isFavoritar,
+        })
+      } else {
         const payload = {
           ...this.filters,
           id: this.id,
+          isFixed: this.isFavoritar,
         }
         this.callback(payload)
       }
