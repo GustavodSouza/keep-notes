@@ -65,21 +65,38 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, shallowRef } from 'vue'
+import { defineComponent, shallowRef } from 'vue'
 
 import { fasXmark } from '@quasar/extras/fontawesome-v6'
+
+import type { ICheckbox } from 'src/interfaces/nota.interface'
 
 export default defineComponent({
   name: 'CaixaSelecaoComponent',
 
+  emits: ['itens-selecionados'],
+
+  props: {
+    data: Array<ICheckbox>,
+  },
+
   data() {
     return {
-      tasks: ref([{ check: false, task: '' }]),
+      tasks: [{ check: false, task: '' }],
       icons: {
         fasXmark,
       },
       expanded: shallowRef<boolean>(true),
     }
+  },
+
+  watch: {
+    tasks: {
+      handler(value) {
+        this.$emit('itens-selecionados', value)
+      },
+      deep: true,
+    },
   },
 
   computed: {
@@ -98,6 +115,12 @@ export default defineComponent({
 
       return `${this.getItensConcluidos.length} itens marcados`
     },
+  },
+
+  mounted() {
+    if (this.data.length) {
+      this.tasks = [...this.data]
+    }
   },
 
   methods: {
