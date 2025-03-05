@@ -64,7 +64,7 @@
       >
         <q-menu style="width: 200px">
           <q-list style="min-width: 100px">
-            <q-item clickable v-close-popup>
+            <q-item clickable v-close-popup @click="excluirNota(card)">
               <q-item-section>
                 <div class="row q-gutter-x-sm">
                   <span>Excluir Nota</span>
@@ -115,7 +115,7 @@ export default defineComponent({
     },
 
     excluirNota(card: INota) {
-      this.$emit('excluirNota', card)
+      this.$emit('excluirNota', card.id)
     },
 
     async fixar(card: INota) {
