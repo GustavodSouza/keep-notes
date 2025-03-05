@@ -34,7 +34,7 @@
         <q-btn flat label="Cancel" color="primary" v-close-popup />
         <q-btn flat label="Turn on Wifi" color="primary" v-close-popup />
       </q-card-actions> -->
-      <q-card-actions>
+      <q-card-actions class="row justify-between">
         <q-icon class="cursor-pointer" name="add" size="25px">
           <q-menu>
             <q-list style="min-width: 100px">
@@ -49,6 +49,7 @@
             </q-list>
           </q-menu>
         </q-icon>
+        <q-btn label="Ok" @click="isEditarNota ? editar() : salvar()" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -74,7 +75,7 @@ export default defineComponent({
 
   data() {
     return {
-      isOpenModal: shallowRef<boolean>(true),
+      isOpenModal: shallowRef<boolean>(false),
       filters: {
         titulo: shallowRef<string>(''),
         nota: ref<string>(''),
@@ -87,16 +88,38 @@ export default defineComponent({
       },
       isFavoritar: shallowRef<boolean>(false),
       isCaixaSelecao: shallowRef<boolean>(false),
+      callback: null as ((value) => void) | null,
+      isEditarNota: shallowRef<boolean>(false),
+      id: shallowRef<string>(''),
     }
   },
 
-  methods: {
-    openModal(params): void {
-      if (params.tipo === 'caixa-selecao') {
-        this.isCaixaSelecao = true
+  watch: {
+    id(value) {
+      if (value) {
+        this.isEditarNota = true
+      } else {
+        this.isEditarNota = false
       }
+    },
+  },
 
-      this.toogleModal(true)
+  methods: {
+    openModal(params) {
+      return new Promise((resolve) => {
+        if (params.tipo === 'caixa-selecao') {
+          this.isCaixaSelecao = true
+        }
+
+        if (params.nota) {
+          this.filters.titulo = params.nota.titulo
+          this.filters.nota = params.nota.nota
+          this.id = params.nota.id
+        }
+
+        this.toogleModal(true)
+        this.callback = resolve
+      })
     },
 
     toogleModal(value: boolean): void {
@@ -108,6 +131,23 @@ export default defineComponent({
       this.filters.nota = ''
       this.isFavoritar = false
       this.isCaixaSelecao = false
+      this.id = ''
+    },
+
+    salvar() {
+      if (this.callback) {
+        this.callback(this.filters)
+      }
+    },
+
+    editar() {
+      if (this.callback) {
+        const payload = {
+          ...this.filters,
+          id: this.id,
+        }
+        this.callback(payload)
+      }
     },
   },
 })
