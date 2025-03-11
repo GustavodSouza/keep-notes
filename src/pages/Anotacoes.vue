@@ -60,7 +60,7 @@ export default defineComponent({
     openModal(tipo: string): void {
       this.$refs.textoDialog.openModal({ tipo }).then((callback) => {
         postNota(callback)
-        notify('positive', 'Nota crriada com sucesso')
+        notify('positive', 'Nota criada com sucesso')
         this.getTodasNotas()
       })
     },

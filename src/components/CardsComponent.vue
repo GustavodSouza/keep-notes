@@ -9,42 +9,42 @@
     >
       <div style="margin-top: 20px">
         <div v-if="card.isCheckbox">
-          <span class="text-h5">{{ card.titulo }}</span>
-          <q-list>
+          <span class="text-h6">{{ card.titulo }}</span>
+          <q-list dense>
             <q-item
-              class="row items-center q-pa-none"
-              v-for="(checkbox, index) in card.checkboxes?.filter((item) => !item.check)"
+              class="row items-center q-gutter-x-sm"
+              style="padding: 0px"
+              v-for="(checkbox, index) in getNaoConcluidos(card)"
               :key="index"
             >
-              <q-checkbox class="col-2" v-model="checkbox.check" dense disable />
-              <input
-                style="height: 30px"
-                class="col-10"
-                v-model="checkbox.task"
-                disabled
-                readonly
+              <q-checkbox
+                class="col-2"
+                v-model.lazy="checkbox.check"
+                dense
+                @update:model-value="check(card)"
               />
+              <span>{{ checkbox.task }}</span>
             </q-item>
-            <q-separator />
+            <q-separator v-if="getNaoConcluidos(card).length && getConcluidos(card).length" />
             <q-item
-              class="row items-center q-pa-none"
-              v-for="(checkbox, index) in card.checkboxes?.filter((item) => item.check)"
+              class="row items-center q-gutter-x-sm"
+              style="padding: 0px"
+              v-for="(checkbox, index) in getConcluidos(card)"
               :key="index"
             >
-              <q-checkbox class="col-2" v-model="checkbox.check" dense disable />
-              <input
-                style="height: 30px"
-                class="col-10"
-                v-model="checkbox.task"
-                disabled
-                readonly
+              <q-checkbox
+                class="col-2"
+                v-model.lazy="checkbox.check"
+                dense
+                @update:model-value="check(card)"
               />
+              <span class="line">{{ checkbox.task }}</span>
             </q-item>
           </q-list>
         </div>
 
         <div v-else>
-          <span class="text-h5">{{ card.titulo }}</span>
+          <span class="text-h6">{{ card.titulo }}</span>
           <p>{{ card.nota }}</p>
         </div>
         <q-icon
@@ -85,6 +85,7 @@ import type { INota } from 'src/interfaces/nota.interface'
 
 import { fasEllipsisVertical, fasThumbtackSlash, fasThumbtack } from '@quasar/extras/fontawesome-v6'
 import { updateNota } from 'src/service/notas.service'
+import { notify } from 'src/plugins/notify'
 
 export default defineComponent({
   name: 'CardComponent',
@@ -123,6 +124,23 @@ export default defineComponent({
       await updateNota(card)
       this.$emit('atualizarDashboard')
     },
+    getNaoConcluidos(card) {
+      return card.checkboxes?.filter((item) => !item.check)
+    },
+
+    getConcluidos(card) {
+      return card.checkboxes?.filter((item) => item.check)
+    },
+
+    check(card: INota) {
+      if (card) {
+        updateNota(card).then(() => {
+          notify('positive', 'Nota atualizada com sucesso')
+          updateNota(card)
+          this.$emit('atualizarDashboard')
+        })
+      }
+    },
   },
 })
 </script>
@@ -137,5 +155,14 @@ export default defineComponent({
   top: 0;
   right: 0;
   padding: 5px 5px 0 0;
+}
+
+.box {
+  min-width: 200px;
+  border-color: #fff;
+}
+
+span.line {
+  text-decoration: line-through;
 }
 </style>
