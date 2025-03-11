@@ -120,7 +120,6 @@ export default defineComponent({
         }
 
         if (params.nota) {
-          console.log(params.nota)
           this.filters.titulo = params.nota.titulo
           this.filters.nota = params.nota.nota
           this.isFavoritar = params.nota.isFixed

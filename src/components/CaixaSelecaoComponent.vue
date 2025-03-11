@@ -1,17 +1,5 @@
 <template>
   <div class="column self-center full-width outline" tabindex="0">
-    <!-- <template v-for="(item, index) in tasks" :key="index">
-      <div class="row items-center q-gutter-x-sm q-py-md no-wrap">
-        <q-checkbox class="col-1" v-model="item.check" />
-        <input style="height: 30px" class="col-10" v-model="item.task" />
-        <q-icon
-          class="cursor-pointer"
-          :name="icons.fasXmark"
-          size="20px"
-          @click="removerTask(index)"
-        />
-      </div>
-    </template> -->
     <q-list bordered dense>
       <q-item
         class="row items-center q-gutter-x-sm q-py-md no-wrap"
@@ -51,7 +39,7 @@
             :key="index"
           >
             <q-checkbox class="col-1" v-model="item.check" />
-            <input style="height: 30px" class="col-10" v-model="item.task" />
+            <input style="height: 30px" class="col-10 line" v-model="item.task" />
             <q-icon
               class="cursor-pointer"
               :name="icons.fasXmark"
@@ -138,3 +126,8 @@ export default defineComponent({
   },
 })
 </script>
+<style lang="scss" scoped>
+input.line {
+  text-decoration: line-through;
+}
+</style>
